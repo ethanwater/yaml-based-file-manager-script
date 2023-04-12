@@ -1,15 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/schollz/progressbar/v3"
 )
 
-const TEXTS string = "/Users/xxx/Documents/texts/"
-const IMAGES string = "/Users/xxx/Documents/images/"
-const MISC string = "/Users/xxx/Documents/misc/"
+const TEXTS string = "/Users/ethanwater/Documents/texts/"
+const IMAGES string = "/Users/ethanwater/Documents/images/"
+const MISC string = "/Users/ethanwater/Documents/misc/"
 
 func IsImage(file string) bool {
 	image := false
@@ -60,12 +63,15 @@ func Organize(path string) {
 			log.Fatal(err)
 		}
 		path = current_directory
+		fmt.Printf("organizing: %s \n", path)
 	}
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	bar := progressbar.Default(int64(len(files)))
 
 	for _, file := range files {
 		old_path := path + file.Name()
@@ -74,12 +80,15 @@ func Organize(path string) {
 		case "img":
 			new_path := IMAGES + file.Name()
 			os.Rename(old_path, new_path)
+			bar.Add(1)
 		case "txt":
 			new_path := TEXTS + file.Name()
 			os.Rename(old_path, new_path)
+			bar.Add(1)
 		default:
 			new_path := MISC + file.Name()
 			os.Rename(old_path, new_path)
+			bar.Add(1)
 		}
 	}
 }
