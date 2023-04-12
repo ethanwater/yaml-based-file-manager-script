@@ -56,7 +56,7 @@ func Type(file string) string {
 	return filetype
 }
 
-func Organize(path string) {
+func UnsafeOrganize(path string) {
 	if path == "" {
 		current_directory, err := os.Getwd()
 		if err != nil {
@@ -93,6 +93,10 @@ func Organize(path string) {
 	}
 }
 
+func CheckLogStaus()           {}
+func SafeOrganize(path string) {}
+func Revert()                  {}
+
 func main() {
-	Organize("")
+	UnsafeOrganize("")
 }
