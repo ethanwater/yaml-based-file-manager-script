@@ -1,8 +1,8 @@
 package main
 
 import (
-    "log"
-    "io/ioutil"
+	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
@@ -10,8 +10,7 @@ import (
 const DOWNLOADS string = "/Users/xxx/Downloads/"
 const TEXTS string = "/Users/xxx/Documents/texts/"
 const IMAGES string = "/Users/xxx/Documents/images/"
-const MISC string =  "/Users/xxx/Documents/misc/"
-
+const MISC string = "/Users/xxx/Documents/misc/"
 
 func IsImage(file string) bool {
 	image := false
@@ -20,6 +19,8 @@ func IsImage(file string) bool {
 	} else if strings.HasSuffix(file, ".jpeg") {
 		image = true
 	} else if strings.HasSuffix(file, ".png") {
+		image = true
+	} else if strings.HasSuffix(file, ".gif") {
 		image = true
 	}
 
@@ -33,6 +34,8 @@ func IsText(file string) bool {
 	} else if strings.HasSuffix(file, ".log") {
 		text = true
 	} else if strings.HasSuffix(file, ".pdf") {
+		text = true
+	} else if strings.HasSuffix(file, ".pages") {
 		text = true
 	}
 	return text
@@ -51,25 +54,38 @@ func Type(file string) string {
 	return filetype
 }
 
-func main() {
-	files, err := ioutil.ReadDir(DOWNLOADS)
-	if err != nil { 
-		log.Fatal(err) 
+func Organize(path string) {
+	if path == "" {
+		current_directory, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		path = current_directory
 	}
 
-    for _, file := range files {
-		old_path := DOWNLOADS + file.Name()
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		old_path := path + file.Name()
 
 		switch Type(file.Name()) {
-			case "img":
-				new_path := IMAGES + file.Name()
-				os.Rename(old_path, new_path)
-			case "txt":
-				new_path := TEXTS + file.Name()
-				os.Rename(old_path, new_path)
-			default:
-				new_path := MISC + file.Name()
-				os.Rename(old_path, new_path)
+		case "img":
+			new_path := IMAGES + file.Name()
+			os.Rename(old_path, new_path)
+		case "txt":
+			new_path := TEXTS + file.Name()
+			os.Rename(old_path, new_path)
+		default:
+			new_path := MISC + file.Name()
+			os.Rename(old_path, new_path)
 		}
-    }
+	}
+}
+
+func main() {
+	Organize("")
+	Organize(DOWNLOADS)
 }
