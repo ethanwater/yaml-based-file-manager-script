@@ -10,9 +10,9 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-const TEXTS string = "/Users/ethanwater/Documents/texts/"
-const IMAGES string = "/Users/ethanwater/Documents/images/"
-const MISC string = "/Users/ethanwater/Documents/misc/"
+const TEXTS string = "texts/"
+const IMAGES string = "images/"
+const MISC string = "misc/"
 
 func IsImage(file string) bool {
 	image := false
