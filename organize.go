@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-const DOWNLOADS string = "/Users/xxx/Downloads/"
 const TEXTS string = "/Users/xxx/Documents/texts/"
 const IMAGES string = "/Users/xxx/Documents/images/"
 const MISC string = "/Users/xxx/Documents/misc/"
@@ -87,5 +86,4 @@ func Organize(path string) {
 
 func main() {
 	Organize("")
-	Organize(DOWNLOADS)
 }
