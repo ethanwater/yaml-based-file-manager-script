@@ -9,11 +9,13 @@ import (
 	"strings"
 
 	"github.com/schollz/progressbar/v3"
+	"gopkg.in/yaml.v3"
 )
 
-const ORIGIN string = "/Users/ethanwater/Downloads/"
-const TEXTS string = "/Users/ethanwater/Documents/texts/"
-const IMAGES string = "/Users/ethanwater/Documents/images/"
+var ORIGIN string
+var TEXTS string
+var IMAGES string
+var MISC string
 
 func IsImage(file string) bool {
 	image := false
@@ -65,32 +67,35 @@ func UnsafeOrganize(path string) {
 		}
 		path = currentDirectory
 	}
-	fmt.Printf("organizing: %s \n", path)
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
 	}
+	if len(files) == 0 {
+		fmt.Println("nothing to organize")
+	} else {
+		fmt.Printf("organizing: %s \n", path)
+		bar := progressbar.DefaultBytes(
+			int64(len(files)),
+			"organizing...",
+		)
 
-	bar := progressbar.DefaultBytes(
-		int64(len(files)),
-		"organizing...",
-	)
+		for _, file := range files {
+			oldPath := path + file.Name()
 
-	for _, file := range files {
-		oldPath := path + file.Name()
-
-		switch Type(file.Name()) {
-		case "img":
-			newPath := IMAGES + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
-		case "txt":
-			newPath := TEXTS + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
-		default:
-			bar.Add(1)
+			switch Type(file.Name()) {
+			case "img":
+				newPath := IMAGES + file.Name()
+				os.Rename(oldPath, newPath)
+				bar.Add(1)
+			case "txt":
+				newPath := TEXTS + file.Name()
+				os.Rename(oldPath, newPath)
+				bar.Add(1)
+			default:
+				bar.Add(1)
+			}
 		}
 	}
 }
@@ -127,44 +132,51 @@ func SafeOrganize(path string) {
 		}
 		path = currentDirectory + "/" //proper formatting of original path
 	}
-	fmt.Printf("organizing: %s \n", path)
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bar := progressbar.DefaultBytes(
-		int64(len(files)),
-		"organizing...",
-	)
+	if len(files) == 0 {
+		fmt.Println("nothing to organize")
+	} else {
+		fmt.Printf("organizing: %s \n", path)
+		bar := progressbar.DefaultBytes(
+			int64(len(files)),
+			"organizing...",
+		)
 
-	for _, file := range files {
-		oldPath := path + file.Name()
-		backup, err := os.OpenFile("backup.log",
-			os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-			0644)
-		if err != nil {
-			log.Fatal(err)
-		}
+		for _, file := range files {
+			oldPath := path + file.Name()
+			backup, err := os.OpenFile("backup.log",
+				os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+				0644)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		if _, err := backup.Write([]byte(file.Name() + "\n")); err != nil {
-			log.Fatal(err)
-		}
+			if _, err := backup.Write([]byte(file.Name() + "\n")); err != nil {
+				log.Fatal(err)
+			}
 
-		switch Type(file.Name()) {
-		case "img":
-			newPath := IMAGES + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
-		case "txt":
-			newPath := TEXTS + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
-		default:
-			bar.Add(1)
+			switch Type(file.Name()) {
+			case "img":
+				newPath := IMAGES + file.Name()
+				os.Rename(oldPath, newPath)
+				bar.Add(1)
+			case "txt":
+				newPath := TEXTS + file.Name()
+				os.Rename(oldPath, newPath)
+				bar.Add(1)
+			default:
+				newPath := MISC + file.Name()
+				os.Rename(oldPath, newPath)
+				bar.Add(1)
+			}
 		}
 	}
+
 }
 
 func Revert() {
@@ -184,31 +196,35 @@ func Revert() {
 
 	if len(logLines) == 0 {
 		fmt.Println("nothing to revert")
-	}
-	fmt.Println("reverting changes")
+	} else {
+		fmt.Println("reverting changes")
 
-	bar := progressbar.DefaultBytes(
-		int64(len(logLines)),
-		"reverting...",
-	)
+		bar := progressbar.DefaultBytes(
+			int64(len(logLines)),
+			"reverting...",
+		)
 
-	for _, line := range logLines {
-		originalPath := ORIGIN + line
-		switch Type(line) {
-		case "img":
-			newPath := IMAGES + line
-			os.Rename(newPath, originalPath)
-			bar.Add(1)
-		case "txt":
-			newPath := TEXTS + line
-			os.Rename(newPath, originalPath)
-			bar.Add(1)
-		default:
-			bar.Add(1)
+		for _, file := range logLines {
+			originalPath := ORIGIN + file
+			switch Type(file) {
+			case "img":
+				newPath := IMAGES + file
+				os.Rename(newPath, originalPath)
+				bar.Add(1)
+			case "txt":
+				newPath := TEXTS + file
+				os.Rename(newPath, originalPath)
+				bar.Add(1)
+			default:
+				newPath := MISC + file
+				os.Rename(newPath, originalPath)
+				bar.Add(1)
+			}
 		}
-	}
 
-	Clear()
+		Clear()
+
+	}
 }
 
 func Clear() {
@@ -217,6 +233,39 @@ func Clear() {
 	}
 }
 
+func Config() {
+	configFile, err := ioutil.ReadFile("config.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data := make(map[interface{}]interface{})
+	err2 := yaml.Unmarshal(configFile, &data)
+
+	if err2 != nil {
+
+		log.Fatal(err2)
+	}
+
+	for k, v := range data {
+		if k == "origin" {
+			ORIGIN = fmt.Sprint(v)
+			continue
+		} else if k == "images" {
+			IMAGES = fmt.Sprint(v)
+			continue
+		} else if k == "texts" {
+			TEXTS = fmt.Sprint(v)
+			continue
+		} else if k == "misc" {
+			MISC = fmt.Sprint(v)
+			continue
+		}
+
+	}
+}
+
 func main() {
+	Config()
 	SafeOrganize(ORIGIN)
 }
