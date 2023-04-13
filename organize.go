@@ -223,6 +223,4 @@ func Clear() {
 	}
 }
 
-func main() {
-	Revert()
-}
+func main() {}
