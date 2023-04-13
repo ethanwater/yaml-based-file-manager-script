@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -100,8 +99,6 @@ func CheckLogStatus() bool { //can possibly be revoked
 	exists := false
 	if _, err := os.Stat("backup.log"); err == nil {
 		exists = true
-	} else if errors.Is(err, os.ErrNotExist) {
-		exists = false
 	}
 
 	return exists
