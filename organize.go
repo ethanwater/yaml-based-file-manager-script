@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -96,14 +95,11 @@ func UnsafeOrganize(path string) {
 	}
 }
 
-func CheckLogStatus() bool { //can possibly be revoked
+func CheckLogStatus() bool { //for testing purposes
 	exists := false
 	if _, err := os.Stat("backup.log"); err == nil {
 		exists = true
-	} else if errors.Is(err, os.ErrNotExist) {
-		exists = false
 	}
-
 	return exists
 }
 
@@ -116,8 +112,7 @@ func SafeOrganize(path string) {
 	//}
 
 	//check if log exists, if not create (kind of useless tho ngl)
-	logStatus := CheckLogStatus()
-	if logStatus == false {
+	if CheckLogStatus() == false {
 		_, err := os.Create("backup.log")
 		if err != nil {
 			log.Fatal(err)
@@ -188,7 +183,7 @@ func Revert() {
 	readLog.Close()
 
 	if len(logLines) == 0 {
-		log.Fatal("nothing to revert")
+		fmt.Println("nothing to revert")
 	}
 	fmt.Println("reverting changes")
 
@@ -211,7 +206,6 @@ func Revert() {
 		default:
 			bar.Add(1)
 		}
-
 	}
 
 	Clear()
@@ -223,4 +217,6 @@ func Clear() {
 	}
 }
 
-func main() {}
+func main() {
+	SafeOrganize(ORIGIN)
+}
