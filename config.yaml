@@ -1,9 +1,17 @@
-origin: "/Users/ethanwater/Downloads/"
-images: "/Users/ethanwater/Documents/images/"
-texts: "/Users/ethanwater/Documents/texts/"
-misc: "/Users/ethanwater/Documents/misc/"
+origin:
+  name: origin
+  path: "/Users/ethanwater/Downloads/"
+  ext: ""
+texts: 
+  name: texts
+  path: "/Users/ethanwater/Documents/docs/"
+  ext: ".txt .doc .docx .pages .pdf"
+images: 
+  name: images
+  path: "/Users/ethanwater/Documents/images/"
+  ext: ".jpg .png .jpeg .gif"
 custom_test: 
   name: golang
-  path: "/Users/ethanwater/Documents/golang"
+  path: "/Users/ethanwater/Documents/golang/"
   ext: ".go .golang" 
 

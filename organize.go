@@ -15,59 +15,91 @@ import (
 var ORIGIN string
 var TEXTS string
 var IMAGES string
-var MISC string
-var CUSTOM_CONFIGS []Custom
+var CONFIGS []Config
 
-func IsImage(file string) bool {
-	image := false
-	if strings.HasSuffix(file, ".jpg") {
-		image = true
-	} else if strings.HasSuffix(file, ".jpeg") {
-		image = true
-	} else if strings.HasSuffix(file, ".png") {
-		image = true
-	} else if strings.HasSuffix(file, ".gif") {
-		image = true
-	}
-
-	return image
+type Config struct {
+	Name string
+	Path string
+	Ext  []string
 }
 
-func IsText(file string) bool {
-	text := false
-	if strings.HasSuffix(file, ".txt") {
-		text = true
-	} else if strings.HasSuffix(file, ".log") {
-		text = true
-	} else if strings.HasSuffix(file, ".pdf") {
-		text = true
-	} else if strings.HasSuffix(file, ".pages") {
-		text = true
+// test
+func CheckLogStatus() bool {
+	exists := false
+	if _, err := os.Stat("backup.log"); err == nil {
+		exists = true
 	}
-	return text
+	return exists
 }
 
-func Type(file string) string {
-	fileType := "null"
-	if IsImage(file) {
-		fileType = "img"
-	} else if IsText(file) {
-		fileType = "txt"
+// main functions
+func Clear() {
+	if err := os.Truncate("backup.log", 0); err != nil {
+		log.Printf("failed to clear backup %s", err)
+	}
+}
+
+func Configurations() {
+	configFile, err := ioutil.ReadFile("config.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data := make(map[string]interface{})
+	err2 := yaml.Unmarshal(configFile, &data)
+
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	for _, v := range data {
+		CONFIGS = append(
+			CONFIGS,
+			CreateConfig(v.(map[string]interface{})),
+		)
+		continue
+	}
+}
+
+func CreateConfig(config map[string]interface{}) Config {
+	var (
+		name string
+		path string
+		ext  string
+	)
+	//name
+	if n, ok := config["name"].(string); ok {
+		name = n
 	} else {
-		fileType = "misc"
+		fmt.Println(ok)
+	}
+	//path
+	if p, ok := config["path"].(string); ok {
+		path = p
+		if name == "origin" {
+			ORIGIN = path
+		}
+	} else {
+		fmt.Println(ok)
+	}
+	//extensions
+	if e, ok := config["ext"].(string); ok {
+		ext = e
+	} else {
+		fmt.Println(ok)
 	}
 
-	return fileType
+	extensions := strings.Split(ext, " ")
+	freshConfig := Config{
+		Name: name,
+		Path: path,
+		Ext:  extensions,
+	}
+	return freshConfig
 }
 
-func UnsafeOrganize(path string) {
-	if path == "" {
-		currentDirectory, err := os.Getwd()
-		if err != nil {
-			log.Fatal(err)
-		}
-		path = currentDirectory
-	}
+func UnsafeOrganize() {
+	Configurations()
+	path := ORIGIN
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -76,6 +108,7 @@ func UnsafeOrganize(path string) {
 	if len(files) == 0 {
 		log.Fatal("nothing to organize")
 	}
+
 	fmt.Printf("organizing: %s \n", path)
 	bar := progressbar.DefaultBytes(
 		int64(len(files)),
@@ -84,54 +117,23 @@ func UnsafeOrganize(path string) {
 
 	for _, file := range files {
 		oldPath := path + file.Name()
-
-		switch Type(file.Name()) {
-		case "img":
-			newPath := IMAGES + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
-		case "txt":
-			newPath := TEXTS + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
-		default:
-			bar.Add(1)
+		for _, config := range CONFIGS {
+			for _, extension := range config.Ext {
+				if strings.Contains(oldPath, extension) {
+					newPath := config.Path + file.Name()
+					os.Rename(oldPath, newPath)
+					break
+				}
+			}
 		}
+		bar.Add(1)
 	}
 }
 
-func CheckLogStatus() bool { //for testing purposes
-	exists := false
-	if _, err := os.Stat("backup.log"); err == nil {
-		exists = true
-	}
-	return exists
-}
-
-func SafeOrganize(path string) {
+func SafeOrganize() {
 	Clear()
-	//format path for files within for custom input directory
-	//weird bug, jump in len(files) ?
-	//if !strings.HasSuffix(path, "/") {
-	//	path += "/"
-	//}
-
-	//check if log exists, if not create (kind of useless tho ngl)
-	if CheckLogStatus() == false {
-		_, err := os.Create("backup.log")
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	//default path declaration
-	if path == "" {
-		currentDirectory, err := os.Getwd()
-		if err != nil {
-			log.Fatal(err)
-		}
-		path = currentDirectory + "/" //proper formatting of original path
-	}
+	Configurations()
+	path := ORIGIN
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -141,7 +143,7 @@ func SafeOrganize(path string) {
 	if len(files) == 0 {
 		log.Fatal("nothing to organize")
 	}
-	fmt.Printf("organizing: %s \n", path)
+	fmt.Printf("safely organizing: %s \n", path)
 
 	bar := progressbar.DefaultBytes(
 		int64(len(files)),
@@ -155,29 +157,26 @@ func SafeOrganize(path string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		if _, err := backup.Write([]byte(file.Name() + "\n")); err != nil {
 			log.Fatal(err)
 		}
 
-		switch Type(file.Name()) {
-		case "img":
-			newPath := IMAGES + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
-		case "txt":
-			newPath := TEXTS + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
-		default:
-			newPath := MISC + file.Name()
-			os.Rename(oldPath, newPath)
-			bar.Add(1)
+		for _, config := range CONFIGS {
+			for _, extension := range config.Ext {
+				if strings.Contains(oldPath, extension) {
+					newPath := config.Path + file.Name()
+					os.Rename(oldPath, newPath)
+					break
+				}
+			}
 		}
+		bar.Add(1)
 	}
 }
 
 func Revert() {
+	Configurations()
+
 	readLog, err := os.Open("backup.log")
 	if err != nil {
 		log.Fatal(err)
@@ -203,106 +202,20 @@ func Revert() {
 	)
 
 	for _, file := range logLines {
-		originalPath := ORIGIN + file
-		switch Type(file) {
-		case "img":
-			newPath := IMAGES + file
-			os.Rename(newPath, originalPath)
-			bar.Add(1)
-		case "txt":
-			newPath := TEXTS + file
-			os.Rename(newPath, originalPath)
-			bar.Add(1)
-		default:
-			newPath := MISC + file
-			os.Rename(newPath, originalPath)
-			bar.Add(1)
+		oldPath := ORIGIN + file
+		for _, config := range CONFIGS {
+			for _, extension := range config.Ext {
+				if strings.Contains(oldPath, extension) {
+					newPath := config.Path + file
+					os.Rename(newPath, oldPath)
+					break
+				}
+			}
 		}
+		bar.Add(1)
 	}
-	Clear()
-}
-
-func Clear() {
-	if err := os.Truncate("backup.log", 0); err != nil {
-		log.Printf("failed to clear backup %s", err)
-	}
-}
-
-func Config() {
-	configFile, err := ioutil.ReadFile("config.yaml")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	data := make(map[string]interface{})
-	err2 := yaml.Unmarshal(configFile, &data)
-
-	if err2 != nil {
-
-		log.Fatal(err2)
-	}
-	for k, v := range data {
-		if k == "origin" {
-			ORIGIN = fmt.Sprint(v)
-			continue
-		} else if k == "images" {
-			IMAGES = fmt.Sprint(v)
-			continue
-		} else if k == "texts" {
-			TEXTS = fmt.Sprint(v)
-			continue
-		} else if strings.HasPrefix(k, "custom") {
-			CUSTOM_CONFIGS = append(
-				CUSTOM_CONFIGS,
-				CustomConfig(v.(map[string]interface{})),
-			)
-			continue
-		}
-	}
-}
-
-func CustomConfig(config map[string]interface{}) Custom {
-	var (
-		name string
-		path string
-		ext  string
-	)
-	//name
-	if n, ok := config["name"].(string); ok {
-		name = n
-	} else {
-		fmt.Println(ok)
-	}
-	//path
-	if p, ok := config["path"].(string); ok {
-		path = p
-	} else {
-		fmt.Println(ok)
-	}
-	//extensions
-	if e, ok := config["ext"].(string); ok {
-		ext = e
-	} else {
-		fmt.Println(ok)
-	}
-
-	extensions := strings.Split(ext, " ")
-	customConfig := Custom{
-		Name: name,
-		Path: path,
-		Ext:  extensions,
-	}
-
-	return customConfig
-}
-
-type Custom struct {
-	Name string
-	Path string
-	Ext  []string
 }
 
 func main() {
-	Config()
-	fmt.Println(CUSTOM_CONFIGS)
+	SafeOrganize()
 }
