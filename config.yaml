@@ -4,5 +4,6 @@ texts: "/Users/ethanwater/Documents/texts/"
 misc: "/Users/ethanwater/Documents/misc/"
 custom_test: 
   name: golang
-  path: "/Users/ethanwater/Desktop/code"
+  path: "/Users/ethanwater/Documents/golang"
   ext: ".go .golang" 
+
