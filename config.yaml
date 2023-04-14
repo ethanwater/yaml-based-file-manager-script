@@ -2,17 +2,14 @@ origin:
   name: origin
   path: "/Users/ethanwater/Downloads/"
   ext: ""
-
+texts: 
+  name: texts
+  path: "/Users/ethanwater/Documents/docs/"
+  ext: ".txt .doc .docx .pages .pdf"
 images: 
   name: images
   path: "/Users/ethanwater/Documents/images/"
   ext: ".jpg .png .jpeg .gif"
-
-texts: 
-  name: texts
-  path: "/Users/ethanwater/Documents/texts/"
-  ext: ".txt .doc .docx .pages .pdf"
-
 custom_test: 
   name: golang
   path: "/Users/ethanwater/Documents/golang/"

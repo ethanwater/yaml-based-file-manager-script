@@ -49,7 +49,6 @@ func Configurations() {
 	err2 := yaml.Unmarshal(configFile, &data)
 
 	if err2 != nil {
-
 		log.Fatal(err2)
 	}
 	for _, v := range data {
@@ -76,6 +75,9 @@ func CreateConfig(config map[string]interface{}) Config {
 	//path
 	if p, ok := config["path"].(string); ok {
 		path = p
+		if name == "origin" {
+			ORIGIN = path
+		}
 	} else {
 		fmt.Println(ok)
 	}
@@ -97,7 +99,7 @@ func CreateConfig(config map[string]interface{}) Config {
 
 func UnsafeOrganize() {
 	Configurations()
-	path := "/Users/ethanwater/Downloads/"
+	path := ORIGIN
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -131,8 +133,7 @@ func UnsafeOrganize() {
 func SafeOrganize() {
 	Clear()
 	Configurations()
-
-	path := "/Users/ethanwater/Downloads/"
+	path := ORIGIN
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -142,7 +143,7 @@ func SafeOrganize() {
 	if len(files) == 0 {
 		log.Fatal("nothing to organize")
 	}
-	fmt.Printf("organizing: %s \n", path)
+	fmt.Printf("safely organizing: %s \n", path)
 
 	bar := progressbar.DefaultBytes(
 		int64(len(files)),
@@ -200,19 +201,6 @@ func Revert() {
 		"reverting...",
 	)
 
-	//for _, file := range logLines {
-	//	originalPath := ORIGIN + file
-	//	switch Type(file) {
-	//	case "img":
-	//		newPath := IMAGES + file
-	//		os.Rename(newPath, originalPath)
-	//		bar.Add(1)
-	//	case "txt":
-	//		newPath := TEXTS + file
-	//		os.Rename(newPath, originalPath)
-	//		bar.Add(1)
-	//	}
-	//}
 	for _, file := range logLines {
 		oldPath := ORIGIN + file
 		for _, config := range CONFIGS {
