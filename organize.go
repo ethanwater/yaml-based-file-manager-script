@@ -239,14 +239,13 @@ func Config() {
 		log.Fatal(err)
 	}
 
-	data := make(map[interface{}]interface{})
+	data := make(map[string]interface{})
 	err2 := yaml.Unmarshal(configFile, &data)
 
 	if err2 != nil {
 
 		log.Fatal(err2)
 	}
-
 	for k, v := range data {
 		if k == "origin" {
 			ORIGIN = fmt.Sprint(v)
@@ -257,15 +256,55 @@ func Config() {
 		} else if k == "texts" {
 			TEXTS = fmt.Sprint(v)
 			continue
-		} else if k == "misc" {
-			MISC = fmt.Sprint(v)
+		} else if strings.HasPrefix(k, "custom") {
+			CustomConfig(v.(map[string]interface{}))
 			continue
 		}
-
 	}
+}
+
+func CustomConfig(config map[string]interface{}) Custom {
+	var (
+		name string
+		path string
+		ext  string
+	)
+	//name
+	if n, ok := config["name"].(string); ok {
+		name = n
+	} else {
+		fmt.Println(ok)
+	}
+	//path
+	if p, ok := config["path"].(string); ok {
+		path = p
+	} else {
+		fmt.Println(ok)
+	}
+	//extensions
+	if e, ok := config["ext"].(string); ok {
+		ext = e
+	} else {
+		fmt.Println(ok)
+	}
+
+	extensions := strings.Split(ext, " ")
+	customConfig := Custom{
+		Name: name,
+		Path: path,
+		Ext:  extensions,
+	}
+
+	fmt.Println(customConfig)
+	return customConfig
+}
+
+type Custom struct {
+	Name string
+	Path string
+	Ext  []string
 }
 
 func main() {
 	Config()
-	SafeOrganize(ORIGIN)
 }
