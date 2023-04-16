@@ -23,16 +23,6 @@ type Config struct {
 	Ext  []string
 }
 
-// test
-func CheckLogStatus() bool {
-	exists := false
-	if _, err := os.Stat("backup.log"); err == nil {
-		exists = true
-	}
-	return exists
-}
-
-// main functions
 func Clear() {
 	if err := os.Truncate("backup.log", 0); err != nil {
 		log.Printf("failed to clear backup %s", err)
