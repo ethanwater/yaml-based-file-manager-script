@@ -261,15 +261,65 @@ func Test() {
 	fmt.Println("Test Complete")
 }
 
-func Scan() {
-	//Scans the given directory and returns information about the directory and
-	//the files within
-	Configurations()
-	path := ORIGIN
+//func Scan() {
+//	//Scans the given directory and returns information about the directory and
+//	//the files within
+//	Configurations()
+//
+//	path := ORIGIN
+//	hiddenCount, directoryCount, matchConfig := 0, 0, 0
+//
+//	files, err := ioutil.ReadDir(path)
+//	fileCount := len(files)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	if len(files) == 0 {
+//		log.Fatal("nothing to organize")
+//	}
+//
+//	fmt.Printf("organizing: %s \n", path)
+//	bar := progressbar.DefaultBytes(
+//		int64(fileCount),
+//		"scanning...",
+//	)
+//
+//	for _, file := range files {
+//		if strings.HasPrefix(file.Name(), ".") {
+//			hiddenCount += 1
+//			bar.Add(1)
+//			continue
+//		} else if file.IsDir() {
+//			directoryCount += 1
+//			bar.Add(1)
+//			continue
+//		}
+//
+//		oldPath := path + file.Name()
+//		for _, config := range CONFIGS {
+//			for _, extension := range config.Ext {
+//				if strings.Contains(oldPath, extension) {
+//					matchConfig += 1
+//					break
+//				}
+//			}
+//		}
+//		bar.Add(1)
+//	}
+//
+//	fmt.Println("\nRESULTS")
+//	fmt.Printf("total files: %d\n", fileCount)
+//	fmt.Printf("hidden files: %d\n", hiddenCount)
+//	fmt.Printf("directory count: %d\n", directoryCount)
+//	fmt.Printf("matching configurations: %d\n", matchConfig)
+//	fmt.Printf("non-matching configurations: %d\n", fileCount-matchConfig)
+//}
 
-	hiddenCount := 0
-	directoryCount := 0
-	matchConfig := 0
+func DeepScan() {
+	Configurations()
+
+	path := ORIGIN
+	hiddenCount, directoryCount, matchConfig := 0, 0, 0
 
 	directory, err := os.Open(path)
 	if err != nil {
@@ -281,52 +331,63 @@ func Scan() {
 	}
 
 	files, err := ioutil.ReadDir(path)
-	fileCount := len(files)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if len(files) == 0 {
+	fileCount := len(files)
+	if fileCount == 0 {
 		log.Fatal("nothing to organize")
 	}
 
-	fmt.Printf("organizing: %s \n", path)
+	fmt.Printf("deep scanning: %s \n", path)
 	bar := progressbar.DefaultBytes(
 		int64(fileCount),
 		"scanning...",
 	)
 
-	for _, file := range files {
-		if strings.HasPrefix(file.Name(), ".") {
-			hiddenCount += 1
-			bar.Add(1)
-			continue
-		} else if file.IsDir() {
-			directoryCount += 1
-			bar.Add(1)
+	extMap := make(map[string]int)
+	for _, config := range CONFIGS {
+		if config.Name == "origin" {
 			continue
 		}
-
-		oldPath := path + file.Name()
-		for _, config := range CONFIGS {
+		count := 0
+		for _, file := range files {
+			if strings.HasPrefix(file.Name(), ".") {
+				hiddenCount += 1
+				bar.Add(1)
+				continue
+			} else if file.IsDir() {
+				directoryCount += 1
+				bar.Add(1)
+				continue
+			}
 			for _, extension := range config.Ext {
-				if strings.Contains(oldPath, extension) {
+				if strings.Contains(file.Name(), extension) {
 					matchConfig += 1
+					count += 1
+					bar.Add(1)
 					break
 				}
 			}
 		}
 		bar.Add(1)
+		extMap[config.Name] = count
 	}
 
-	fmt.Println("\nRESULTS")
-	fmt.Printf("directory stat: %+v\n", directoryStat)
-	fmt.Printf("total files: %d\n", fileCount)
-	fmt.Printf("hidden files: %d\n", hiddenCount)
-	fmt.Printf("cirectory count: %d\n", directoryCount)
-	fmt.Printf("matching configurations: %d\n", matchConfig)
-	fmt.Printf("non-matching configurations: %d\n", fileCount-matchConfig)
+	fmt.Printf("STATISTICS: %+v\n", directoryStat)
+	fmt.Printf("TOTAL: %d\n", fileCount)
+	for key, value := range extMap {
+		fmt.Printf("%s: %d\n", key, value)
+	}
+	fmt.Printf("HIDDEN: %d\n", hiddenCount)
+	fmt.Printf("DIRECTORIES: %d\n", directoryCount)
+	fmt.Printf("CONFIGURATIONS: %d\n", matchConfig)
+	fmt.Println("FILES: ")
+	for _, file := range files {
+		fmt.Print(file.Name(), ", ")
+	}
 }
 
 func main() {
-	Scan()
+	DeepScan()
 }
