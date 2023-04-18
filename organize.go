@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/schollz/progressbar/v3"
 	"gopkg.in/yaml.v3"
@@ -121,6 +122,7 @@ func UnsafeOrganize() {
 		"organizing...",
 	)
 
+	start := time.Now()
 	for _, file := range files {
 		oldPath := path + file.Name()
 		for _, config := range CONFIGS {
@@ -134,6 +136,10 @@ func UnsafeOrganize() {
 		}
 		bar.Add(1)
 	}
+	end := time.Now()
+	fmt.Println("complete!")
+	fmt.Println("time elapsed: ", end.Sub(start))
+
 }
 
 func SafeOrganize() {
@@ -157,6 +163,7 @@ func SafeOrganize() {
 		int64(len(files)),
 		"organizing...",
 	)
+	start := time.Now()
 	for _, file := range files {
 		oldPath := path + file.Name()
 		backup, err := os.OpenFile("backup.log",
@@ -180,6 +187,9 @@ func SafeOrganize() {
 		}
 		bar.Add(1)
 	}
+	end := time.Now()
+	fmt.Println("complete!")
+	fmt.Println("time elapsed: ", end.Sub(start))
 }
 
 func Revert() {
@@ -211,6 +221,7 @@ func Revert() {
 		"reverting...",
 	)
 
+	start := time.Now()
 	for _, file := range logLines {
 		oldPath := ORIGIN + file
 		for _, config := range CONFIGS {
@@ -224,6 +235,9 @@ func Revert() {
 		}
 		bar.Add(1)
 	}
+	end := time.Now()
+	fmt.Println("complete!")
+	fmt.Println("time elapsed: ", end.Sub(start))
 }
 
 func Test() {
@@ -247,6 +261,7 @@ func Test() {
 		"testing organize...",
 	)
 
+	start := time.Now()
 	for _, file := range files {
 		oldPath := path + file.Name()
 		for _, config := range CONFIGS {
@@ -258,7 +273,9 @@ func Test() {
 		}
 		bar.Add(1)
 	}
-	fmt.Println("Test Complete")
+	end := time.Now()
+	fmt.Println("complete!")
+	fmt.Println("time elapsed: ", end.Sub(start))
 }
 
 //func Scan() {
@@ -346,6 +363,7 @@ func DeepScan() {
 	)
 
 	extMap := make(map[string]int)
+	start := time.Now()
 	for _, config := range CONFIGS {
 		if config.Name == "origin" {
 			continue
@@ -373,7 +391,12 @@ func DeepScan() {
 		bar.Add(1)
 		extMap[config.Name] = count
 	}
+  
+	end := time.Now()
+	timeElapsed := end.Sub(start)
 
+	fmt.Println("complete!")
+	fmt.Println("time elapsed: ", timeElapsed)
 	fmt.Printf("STATISTICS: %+v\n", directoryStat)
 	fmt.Printf("TOTAL: %d\n", fileCount)
 	for key, value := range extMap {
