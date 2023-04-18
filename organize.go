@@ -391,6 +391,7 @@ func DeepScan() {
 		bar.Add(1)
 		extMap[config.Name] = count
 	}
+  
 	end := time.Now()
 	timeElapsed := end.Sub(start)
 
