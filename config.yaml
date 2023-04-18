@@ -3,15 +3,15 @@ origin:
   path: "/Users/ethanwater/Downloads/"
   ext: ""
 texts: 
-  name: texts
+  name: TEXTS
   path: "/Users/ethanwater/Documents/docs/"
   ext: ".txt .doc .docx .pages .pdf"
 images: 
-  name: images
+  name: IMAGES
   path: "/Users/ethanwater/Documents/images/"
   ext: ".jpg .png .jpeg .gif"
 custom_test: 
-  name: golang
+  name: GOLANG
   path: "/Users/ethanwater/Documents/golang/"
   ext: ".go .golang" 
 
