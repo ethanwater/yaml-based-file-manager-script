@@ -66,19 +66,16 @@ func Configurations() {
 }
 
 func CreateConfig(config map[string]interface{}) Config {
-	//establishes a config form the YAML
 	var (
 		name string
 		path string
 		ext  string
 	)
-	//name
 	if n, err := config["name"].(string); err {
 		name = n
 	} else {
 		fmt.Println(err)
 	}
-	//path
 	if p, err := config["path"].(string); err {
 		path = p
 		if name == "origin" {
@@ -87,7 +84,6 @@ func CreateConfig(config map[string]interface{}) Config {
 	} else {
 		fmt.Println(err)
 	}
-	//extensions
 	if e, err := config["ext"].(string); err {
 		ext = e
 	} else {
@@ -104,7 +100,6 @@ func CreateConfig(config map[string]interface{}) Config {
 }
 
 func UnsafeOrganize() {
-	//Organizes the files in an unsafe manner, void of logging
 	Configurations()
 	path := ORIGIN
 
@@ -143,8 +138,6 @@ func UnsafeOrganize() {
 }
 
 func SafeOrganize() {
-	//Uses a logging system to log every file move executed. Creates/writes to a
-	//backup file, which is necessary to call Revert
 	Clear()
 	Configurations()
 	path := ORIGIN
@@ -193,8 +186,6 @@ func SafeOrganize() {
 }
 
 func Revert() {
-	//Reverts the previous SafeOrganization actions, if the backup is empty,
-	//this will do nothing
 	Configurations()
 
 	readLog, err := os.Open("backup.log")
@@ -241,9 +232,6 @@ func Revert() {
 }
 
 func Test() {
-	//Test is used to make sure that the Safe and Unsafe Organization functions
-	//run smoothly without any error. No files will be renamed/moved during this
-	//process.
 	Configurations()
 	path := ORIGIN
 
@@ -391,7 +379,7 @@ func DeepScan() {
 		bar.Add(1)
 		extMap[config.Name] = count
 	}
-  
+
 	end := time.Now()
 	timeElapsed := end.Sub(start)
 
