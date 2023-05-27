@@ -15,8 +15,6 @@ import (
 )
 
 var ORIGIN string
-var TEXTS string
-var IMAGES string
 var CONFIGS []Config
 var CONFIG_FILE string
 
