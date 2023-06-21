@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-
 	"github.com/schollz/progressbar/v3"
 	"gopkg.in/yaml.v3"
 )
