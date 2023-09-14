@@ -1,0 +1,17 @@
+origin:
+  name: ORIGIN
+  path: "/Users/ethan/Downloads/"
+  ext: ""
+texts: 
+  name: TEXTS
+  path: "/Users/ethan/Documents/Texts/"
+  ext: ".txt .doc .docx .pages .pdf .html"
+images: 
+  name: IMAGES
+  path: "/Users/ethan/Documents/Images/"
+  ext: ".jpg .png .jpeg .gif"
+custom_test: 
+  name: GOLANG
+  path: "/Users/ethan/Documents/golang/"
+  ext: ".go .golang" 
+

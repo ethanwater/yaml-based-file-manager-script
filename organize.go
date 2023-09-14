@@ -37,14 +37,14 @@ func SetConfig(config string) {
 	CONFIG_FILE = config
 }
 
-func Clear() {
+func ClearBackup() {
 	if err := os.Truncate("backup.log", 0); err != nil {
 		log.Printf("failed to clear backup %s", err)
 	}
 }
 
 func Configurations() {
-	configFile, err := ioutil.ReadFile("config.yaml")
+	configFile, err := ioutil.ReadFile("example_config.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,6 +55,7 @@ func Configurations() {
 	if err2 != nil {
 		log.Fatal(err2)
 	}
+
 	for _, v := range data {
 		CONFIGS = append(
 			CONFIGS,
@@ -65,24 +66,31 @@ func Configurations() {
 }
 
 func CreateConfig(config map[string]interface{}) Config {
+//Configuration initialization. This is the first function performed in order to
+//allow organize.go to work properly. Due to the YAML integration, organize.go
+//allows for a highly flexible and customizable configuration system to best fit
+//the users needs.
 	var (
 		name string
 		path string
 		ext  string
 	)
+
 	if n, err := config["name"].(string); err {
 		name = n
 	} else {
 		fmt.Println(err)
 	}
+
 	if p, err := config["path"].(string); err {
 		path = p
-		if name == "origin" {
+		if name == "ORIGIN" {
 			ORIGIN = path
 		}
 	} else {
 		fmt.Println(err)
 	}
+
 	if e, err := config["ext"].(string); err {
 		ext = e
 	} else {
@@ -130,14 +138,20 @@ func UnsafeOrganize() {
 		}
 		bar.Add(1)
 	}
-	end := time.Now()
-	fmt.Println("complete!")
-	fmt.Println("time elapsed: ", end.Sub(start))
 
+	end := time.Now()
+	fmt.Printf("complete!\ntime elapsed: %f secs", end.Sub(start).Seconds())
 }
 
+
 func SafeOrganize() {
-	Clear()
+//SafeOrganize organizes the origin directory using the same file organization
+//method used in the UnsafeOrganize function. However, it updates the backup.log
+//file the program created in order to keep track of the previous paths of the
+//now moved files. This way, in case of any error in the file organization, the
+//user can call the Revert function to revert any files moved to their original
+//locations.
+	ClearBackup()
 	Configurations()
 	path := ORIGIN
 
@@ -180,11 +194,12 @@ func SafeOrganize() {
 		bar.Add(1)
 	}
 	end := time.Now()
-	fmt.Println("complete!")
-	fmt.Println("time elapsed: ", end.Sub(start))
+	fmt.Printf("complete!\ntime elapsed: %f secs", end.Sub(start).Seconds())
 }
 
 func Revert() {
+//Reverts aby changes from the last SafeOrganize call. Can only revert the past
+//organzation call. Any calls before that must be changed manually by the user.
 	Configurations()
 
 	readLog, err := os.Open("backup.log")
@@ -226,11 +241,14 @@ func Revert() {
 		bar.Add(1)
 	}
 	end := time.Now()
-	fmt.Println("complete!")
-	fmt.Println("time elapsed: ", end.Sub(start))
+	fmt.Printf("complete!\ntime elapsed: %f secs", end.Sub(start).Seconds())
 }
 
 func Test() {
+//The Test function tests a "pseudo-organization" in order to assure that either
+//Unsafe or Safe organization methods will work properly. In almost every case,
+//if there is an error, the organzaiton methods will notice it and notify the
+//user of the error.
 	Configurations()
 	path := ORIGIN
 
@@ -261,11 +279,12 @@ func Test() {
 		bar.Add(1)
 	}
 	end := time.Now()
-	fmt.Println("complete!")
-	fmt.Println("time elapsed: ", end.Sub(start))
+	fmt.Printf("complete!\ntime elapsed: %f secs", end.Sub(start).Seconds())
 }
 
 func DeepScan() {
+//DeepScan returns statistics about the directories that are initialized in the
+//configuration file.
 	Configurations()
 
 	path := ORIGIN
@@ -326,10 +345,8 @@ func DeepScan() {
 	}
 
 	end := time.Now()
-	timeElapsed := end.Sub(start)
 
-	fmt.Println("complete!")
-	fmt.Println("time elapsed: ", timeElapsed)
+	fmt.Printf("complete!\ntime elapsed: %f secs", end.Sub(start).Seconds())
 	fmt.Printf("STATISTICS: %+v\n", directoryStat)
 	fmt.Printf("TOTAL: %d\n", fileCount)
 	for key, value := range extMap {
@@ -345,5 +362,5 @@ func DeepScan() {
 }
 
 func main() {
-	DeepScan()
+	OpenConfig()
 }
