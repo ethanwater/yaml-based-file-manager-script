@@ -7,12 +7,7 @@ This Go program is a file organization utility that allows you to organize files
 1. Features
 2. Prerequisites
 3. Usage
-4. Configuration
-5. Organizing Files
-6. Reverting Changes
-7. Testing
-8. Deep Scan and Statistics
-9. License
+4. License
 
 ## Features
 
