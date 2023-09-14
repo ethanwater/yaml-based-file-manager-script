@@ -31,7 +31,7 @@ gopkg.in/yaml.v3
 
 ## Usage
 ### Configuration
-Create a YAML configuration file named config.yaml with your desired file organization rules. Example:\
+Create a YAML configuration file named config.yaml with your desired file organization rules. Example:
 ```yaml
 - name: origin
   path: /path/to/origin/
