@@ -282,6 +282,55 @@ func Test() {
 	fmt.Printf("complete!\ntime elapsed: %f secs", end.Sub(start).Seconds())
 }
 
+func Scan() {
+ 	//Scans the given directory and returns information about the directory and
+ 	//the files within
+ 	Configurations()
+ 
+ 	path := ORIGIN
+ 	hiddenCount, directoryCount, matchConfig := 0, 0, 0
+ 
+ 	files, err := ioutil.ReadDir(path)
+ 	fileCount := len(files)
+	if err != nil {
+ 		log.Fatal(err)
+ 	}
+ 	if len(files) == 0 {
+ 		log.Fatal("nothing to organize")
+ 	}
+ 
+ 	fmt.Printf("organizing: %s \n", path)
+ 	bar := progressbar.DefaultBytes(
+ 		int64(fileCount),
+ 		"scanning...",
+	)
+	start := time.Now()
+ 
+	for _, file := range files {
+ 		if strings.HasPrefix(file.Name(), ".") {
+ 			hiddenCount += 1
+ 			bar.Add(1)
+ 			continue
+ 		} else if file.IsDir() {
+ 			directoryCount += 1
+ 			bar.Add(1)
+ 			continue
+ 		}
+		oldPath := path + file.Name()
+ 		for _, config := range CONFIGS {
+ 			for _, extension := range config.Ext {
+ 				if strings.Contains(oldPath, extension) {
+ 					matchConfig += 1
+ 					break
+ 				}
+ 			}
+			bar.Add(1)
+		}
+	}
+	end := time.Now()
+	fmt.Printf("complete!\ntime elapsed: %f secs", end.Sub(start).Seconds())
+}
+
 func DeepScan() {
 //DeepScan returns statistics about the directories that are initialized in the
 //configuration file.
@@ -362,5 +411,5 @@ func DeepScan() {
 }
 
 func main() {
-	OpenConfig()
+	Scan()
 }
