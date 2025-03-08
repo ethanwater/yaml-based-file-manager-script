@@ -2,30 +2,7 @@
 
 This Go program is a file organization utility that allows you to organize files in a directory based on user-defined configurations specified in a YAML file. It provides options for safely organizing files, reverting changes, and performing deep scans to gather statistics about the files in the directory.
 
-## Table of Contents
-
-1. Features
-2. Prerequisites
-3. Usage
-4. License
-
-## Features
-
-Organize files in a directory based on user-defined rules.
-Safely organize files, creating a log of changes made.
-Revert changes made during the organization process.
-Perform a deep scan of files, including statistics on file types and directories.
-
-## Prerequisites
-Before using this utility, ensure you have the following prerequisites installed:
-
-Go programming language: https://golang.org/dl/
-Required Go packages, which can be installed using go get:
-github.com/schollz/progressbar/v3
-gopkg.in/yaml.v3
-
 ## Usage
-### Configuration
 Create a YAML configuration file named config.yaml with your desired file organization rules. Example:
 ```yaml
 - name: origin
@@ -65,5 +42,3 @@ To perform a deep scan of the files in the origin directory and gather statistic
 ```sh
 go run main.go -deepscan
 ```
-## License
-This code is licensed under the MIT License. See the LICENSE file for details.
